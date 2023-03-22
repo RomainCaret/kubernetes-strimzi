@@ -1,0 +1,106 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: strimzi-cluster-role-limited
+  labels:
+    app: strimzi
+rules:
+  # This ClusterRole is the union of all roles from the 3 following ClusterRoles:
+  #  - strimzi-cluster-operator-namespaced
+  #  - strimzi-entity-operator
+  # from which we have removed all roles already in the admin ClusterRole
+  #
+  # This ClusterRole is bound to kafka admin-quota SA so that ArgoCD has enough rights to apply 
+  # the strimzi RoleBindings when new namespaces are created. 
+  
+- apiGroups:
+  - "kafka.strimzi.io"
+  resources:
+  - kafkas
+  - kafkas/status
+  - kafkaconnects
+  - kafkaconnects/status
+  - kafkaconnects/scale
+  - kafkaconnectors
+  - kafkaconnectors/status
+  - kafkaconnectors/scale
+  - kafkamirrormakers
+  - kafkamirrormakers/status
+  - kafkamirrormakers/scale
+  - kafkabridges
+  - kafkabridges/status
+  - kafkabridges/scale
+  - kafkamirrormaker2s
+  - kafkamirrormaker2s/status
+  - kafkamirrormaker2s/scale
+  - kafkarebalances
+  - kafkarebalances/status
+  - kafkatopics
+  - kafkatopics/status
+  - kafkausers
+  - kafkausers/status
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+  - patch
+  - update
+
+- apiGroups:
+  - "core.strimzi.io"
+  resources:
+  - strimzipodsets
+  - strimzipodsets/status
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+  - patch
+  - update
+
+- apiGroups:
+  - ""
+  - "events.k8s.io"
+  resources:
+  - events
+  verbs:
+  - create
+
+- apiGroups:
+  - apps.openshift.io
+  resources:
+  - deploymentconfigs/finalizers
+  - deploymentconfigs/status
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+  - patch
+  - update
+
+- apiGroups:
+  - "apps"
+  resources:
+  # The cluster operator needs to access and manage deployments to run deployment based Strimzi components
+  - deployments/status
+  verbs:
+  - create
+  - delete
+  - patch
+  - update
+
+- apiGroups:
+  - image.openshift.io
+  resources:
+  - imagestreams/status
+  verbs:
+  - create
+  - delete
+  - patch
+  - update
